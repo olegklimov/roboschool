@@ -507,9 +507,9 @@ void Joint::set_relative_servo_target(float target_pos, float kp, float kd)
 {
 	float pos_mid = 0.5*(joint_limit1 + joint_limit2);
 	set_servo_target( pos_mid + 0.5*target_pos*(joint_limit2 - joint_limit1),
-		joint_max_velocity || 10.0,  // 10 rad/s
+		joint_max_velocity ? joint_max_velocity : 10.0,  // 10 rad/s
 		kp, kd,
-		joint_max_force || 75); // 75 is about as strong as humanoid hands
+		joint_max_force ? joint_max_force : 75); // 75 is about as strong as humanoid hands
 }
 
 void Joint::joint_current_position(float* pos, float* speed)
