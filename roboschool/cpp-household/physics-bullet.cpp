@@ -466,7 +466,6 @@ void Joint::set_motor_torque(float torque)
 	shared_ptr<World> w = wref.lock();
 	if (!r || !w) return;
 	if (first_torque_call) {
-		//set_target_speed(0, 1.0, 4.0);
 		set_servo_target(0, 0, 0.1, 0.1, 0);
 		first_torque_call = false;
 	}
@@ -504,6 +503,15 @@ void Joint::set_servo_target(float target_pos, float target_speed, float kp, flo
 	torque_need_repeat = false;
 }
 
+void Joint::set_relative_servo_target(float target_pos, float kp, float kd)
+{
+	float pos_mid = 0.5*(joint_limit1 + joint_limit2);
+	set_servo_target( pos_mid + 0.5*target_pos*(joint_limit2 - joint_limit1),
+		joint_max_velocity || 10.0,  // 10 rad/s
+		kp, kd,
+		joint_max_force || 75); // 75 is about as strong as humanoid hands
+}
+
 void Joint::joint_current_position(float* pos, float* speed)
 {
 	shared_ptr<Robot> r = robot.lock();
@@ -515,6 +523,26 @@ void Joint::joint_current_position(float* pos, float* speed)
 	b3GetJointState(w->client, status_handle, bullen_joint_n, &state);
 	*pos = state.m_jointPosition;
 	*speed = state.m_jointVelocity;
+}
+
+void Joint::joint_current_relative_position(float* pos, float* speed)
+{
+	float rpos, rspeed;
+	joint_current_position(&rpos, &rspeed);
+	if (joint_has_limits) {
+		float pos_mid = 0.5 * (joint_limit1 + joint_limit2);
+		rpos = 2 * (rpos - pos_mid) / (joint_limit2 - joint_limit1);
+	}
+	if (joint_max_velocity > 0) {
+		rspeed /= joint_max_velocity;
+	} else {
+		if (joint_type==Household::Joint::ROTATIONAL_MOTOR)
+			rspeed *= 0.1; // normalize for 10 radian per second == 1  (6.3 radian/s is one rpm)
+		else
+			rspeed *= 0.5; // typical distance 1 meter, something fast travel it in 0.5 seconds (speed is 2)
+	}
+	*pos = rpos;
+	*speed = rspeed;
 }
 
 void Joint::reset_current_position(float pos, float vel)

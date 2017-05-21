@@ -250,19 +250,7 @@ struct Joint {
 	void set_servo_target(float target_pos, float target_speed, float kp, float kd, float maxforce)  { jref->set_servo_target(target_pos, target_speed, kp, kd, maxforce); }
 	void reset_current_position(float pos, float vel)  { jref->reset_current_position(pos, vel); }
 	boost::python::tuple current_position()  { float pos, speed; jref->joint_current_position(&pos, &speed); return make_tuple(pos, speed); }
-	boost::python::tuple current_relative_position()
-	{
-		float pos, speed;
-		jref->joint_current_position(&pos, &speed);
-		if (jref->joint_has_limits) {
-			float pos_mid = 0.5 * (jref->joint_limit1 + jref->joint_limit2);
-			pos = 2 * (pos - pos_mid) / (jref->joint_limit2 - jref->joint_limit1);
-		}
-		if (jref->joint_type==Household::Joint::ROTATIONAL_MOTOR)
-			return make_tuple(pos, speed * 0.1); // normalize for 10 radian per second == 1  (6.3 radian/s is one rpm)
-		else
-			return make_tuple(pos, speed * 0.5); // typical distance 1 meter, something fast travel it in 0.5 seconds (speed is 2)
-	}
+	boost::python::tuple current_relative_position()  { float pos, speed; jref->joint_current_relative_position(&pos, &speed); return make_tuple(pos, speed); }
 	boost::python::tuple limits()  { return make_tuple(jref->joint_limit1, jref->joint_limit2, jref->joint_max_force, jref->joint_max_velocity); }
 
 	std::string type()

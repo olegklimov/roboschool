@@ -83,10 +83,16 @@ struct Joint {
 	//btScalar prev_p = 1e10;
 
 	void set_motor_torque(float torque);
+
 	void set_target_speed(float target_speed, float kd, float maxforce);
+	void set_relative_target_speed(float target_speed, float kp);
+
 	void set_servo_target(float target_pos, float target_speed, float kp, float kd, float maxforce);
+	void set_relative_servo_target(float target_pos, float kp, float kd);
 
 	void joint_current_position(float* pos, float* speed);
+	void joint_current_relative_position(float* pos, float* speed);
+
 	void reset_current_position(float pos, float vel);
 
 	void activate();
