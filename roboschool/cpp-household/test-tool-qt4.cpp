@@ -251,7 +251,6 @@ public:
 	{
 		grid = new QGridLayout();
 		setLayout(grid);
-		world->cx.reset(new SimpleRender::Context(world));
 		viz = new Viz(world->cx);
 		viz->wheel /= SCALE;
 		viz->wheel *= 4; // bigger scale on start, compared to house
@@ -344,8 +343,6 @@ public:
 		}
 
 		refresh_joint_control_modes();
-
-		startTimer(10);
 	}
 
 	~TestWindow()
@@ -408,9 +405,9 @@ public:
 			default: assert(0);
 			}
 		}
-		world->bullet_step(1);
+
 		viz->render_on_offscreen_surface();
-		viz->update();
+		viz->repaint();
 	}
 
 	void keyPressEvent(QKeyEvent* kev)
@@ -420,13 +417,6 @@ public:
 		else if (kev->key()==Qt::Key_F3)
 			last_reload_time = 0;
 		else kev->ignore();
-	}
-
-	bool event(QEvent* ev)
-	{
-		if (ev->type()==QEvent::Timer)
-			timeout();
-		return QWidget::event(ev);
 	}
 
 	void refresh_joint_control_modes()
@@ -473,7 +463,6 @@ int main(int argc, char *argv[])
 #ifdef Q_MAC_OS
 [NSApp activateIgnoringOtherApps:YES];
 #endif
-	QApplication app(argc, argv);
 	if (argc < 2) {
 		fprintf(stderr, "This is robot/model testing utility.\n\nUsage:\n");
 		fprintf(stderr, "%s <urdf_resources_dir> <urdf>\n", argv[0]);
@@ -485,15 +474,20 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	world.reset(new World);
+	SimpleRender::opengl_init_before_app(world);
+	QApplication app(argc, argv);
+	SimpleRender::opengl_init(world->cx);
+
 	fprintf(stderr, "Press F3 to force reload (when you change dependencies of file)\n");
 
 	the_filename = argv[1];
 
-	world.reset(new World);
 	world->bullet_init(0.0*SCALE, 1/60.0);
 
 	load_model_or_robot();
 	if (!the_robot && !the_model) return 1; // warning printed
+
 
 	TestWindow window(world);
 	window.resize(1280, 1024);
@@ -503,7 +497,7 @@ int main(int argc, char *argv[])
 	QEventLoop loop;
 	while (1) {
 		world->bullet_step(1);
-		world->query_positions();
+		window.timeout();
 		loop.processEvents(QEventLoop::AllEvents);
 		if (!window.isVisible()) break;
 	}

@@ -9,9 +9,6 @@
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QBuffer>
 
-extern void opengl_init_before_app(const boost::shared_ptr<Household::World>& wref);
-extern void opengl_init(const shared_ptr<Household::World>& wref);
-
 using boost::shared_ptr;
 using namespace boost::python;
 
@@ -151,10 +148,10 @@ static boost::weak_ptr<App> the_app;
 shared_ptr<App> app_create(const shared_ptr<Household::World>& wref)
 {
 	shared_ptr<App> app;
-	opengl_init_before_app(wref);
+	SimpleRender::opengl_init_before_app(wref);
 	app.reset(new App);
 	the_app = app;
-	opengl_init(wref);
+	SimpleRender::opengl_init(wref->cx);
 	return app;
 }
 
