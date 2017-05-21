@@ -6,9 +6,10 @@ import numpy as np
 #
 
 help = """
-Expected values:
-Linux  i7 4.0 GHz:   2400 ± 600   1060 FPS   80M
-OS X   i7 2.2 GHz:    -/-
+Expected values, score 2370 ± 770, speed and memory:
+Linux   i7 4.0 GHz:  1060 FPS   80 Mb
+Macbook i7 3.0 GHz:  1400 FPS   64 Mb
+(not a mistake, Bullet is faster on mac as of May 2017)
 """
 
 from RoboschoolHumanoidFlagrunHarder_v0_2017may import SmallReactivePolicy as HumanoidPolicy
@@ -35,11 +36,11 @@ def bullet_regression_test_score_and_fps(env):
     print("Speed: %0.1f FPS (%i frames in %0.1fs)" % (frame/(t2-t1), frame, t2-t1))
 
 def bullet_regression_test_memory_leak(env):
-    print("Memory used: %0.2fM" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024))
+    print("Memory used: %0.1f" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024))
     print("Now do 5000 resets:")
     for episode in tqdm.tqdm(range(5000)):
         env.reset()
-    print("Memory used: %0.2fM" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024))
+    print("Memory used: %0.2f" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024))
 
 if __name__=="__main__":
     env = gym.make("RoboschoolHumanoidFlagrunHarder-v0")
