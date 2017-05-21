@@ -458,6 +458,12 @@ void World::query_body_position(const shared_ptr<Robot>& robot)
 		part->bullet_angular_speed[2] = linkstate.m_worldAngularVelocity[2];
 		part->bullet_queried_at_least_once = true;
 	}
+
+	for (const shared_ptr<Joint>& j: robot->joints) {
+		if (!j) continue;
+		j->joint_current_position = q[j->bullet_qindex];
+		j->joint_current_speed = q_dot[j->bullet_uindex];
+	}
 }
 
 void Joint::set_motor_torque(float torque)
@@ -492,6 +498,8 @@ void Joint::set_servo_target(float target_pos, float target_speed, float kp, flo
 	shared_ptr<Robot> r = robot.lock();
 	shared_ptr<World> w = wref.lock();
 	if (!r || !w) return;
+	//if (joint_name.find("knee") != std::string::npos)
+	//	fprintf(stderr, "%s to %0.3f\n", joint_name.c_str(), target_pos);
 	b3SharedMemoryCommandHandle cmd = b3JointControlCommandInit2(w->client, r->bullet_handle, CONTROL_MODE_POSITION_VELOCITY_PD);
 	b3JointControlSetDesiredPosition(cmd, bullet_qindex, target_pos);
 	b3JointControlSetKp(cmd,              bullet_uindex, kp);
@@ -509,26 +517,14 @@ void Joint::set_relative_servo_target(float target_pos, float kp, float kd)
 	set_servo_target( pos_mid + 0.5*target_pos*(joint_limit2 - joint_limit1),
 		joint_max_velocity ? joint_max_velocity : 10.0,  // 10 rad/s
 		kp, kd,
-		joint_max_force ? joint_max_force : 75); // 75 is about as strong as humanoid hands
-}
-
-void Joint::joint_current_position(float* pos, float* speed)
-{
-	shared_ptr<Robot> r = robot.lock();
-	shared_ptr<World> w = wref.lock();
-	if (!r || !w) return;
-	b3SharedMemoryCommandHandle cmd_handle = b3RequestActualStateCommandInit(w->client, r->bullet_handle);
-	b3SharedMemoryStatusHandle status_handle = b3SubmitClientCommandAndWaitStatus(w->client, cmd_handle);
-	b3JointSensorState state;
-	b3GetJointState(w->client, status_handle, bullen_joint_n, &state);
-	*pos = state.m_jointPosition;
-	*speed = state.m_jointVelocity;
+		joint_max_force ? joint_max_force : 40); // 40 is about as strong as humanoid hands
 }
 
 void Joint::joint_current_relative_position(float* pos, float* speed)
 {
 	float rpos, rspeed;
-	joint_current_position(&rpos, &rspeed);
+	rpos = joint_current_position;
+	rspeed = joint_current_speed;
 	if (joint_has_limits) {
 		float pos_mid = 0.5 * (joint_limit1 + joint_limit2);
 		rpos = 2 * (rpos - pos_mid) / (joint_limit2 - joint_limit1);

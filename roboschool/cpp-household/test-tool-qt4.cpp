@@ -148,9 +148,7 @@ public:
 			QDoubleSpinBox* spin = new QDoubleSpinBox();
 			spin->setPrefix(QString("Joint %1 = ") . arg(c));
 			spin->setRange(-10, 10);
-			float pos, speed;
-			j->joint_current_position(&pos, &speed);
-			spin->setValue(pos);
+			spin->setValue(j->joint_current_position);
 			spin->setSingleStep(0.02);
 			joint_spins[c] = spin;
 			sidegrid->addWidget(spin, y, 0);
@@ -246,7 +244,7 @@ public:
 				QDoubleSpinBox* spin = joint_spins[c];
 				float p = spin->value();
 				switch (joint_control_mode[c]) {
-				case 0: j->set_relative_servo_target(p, 2.0, 100.0); break;
+				case 0: j->set_relative_servo_target(p, 0.02, 0.2); break;
 				case 1: j->set_target_speed(p, 0.1, 20); break;
 				case 2: j->set_motor_torque(p); break;
 				default: assert(0);
