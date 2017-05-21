@@ -247,7 +247,7 @@ struct Joint {
 	std::string name()  { return jref->joint_name; }
 	void set_motor_torque(float q)  { jref->set_motor_torque(q); }
 	void set_target_speed(float target_speed, float kd, float maxforce)  { jref->set_target_speed(target_speed, kd, maxforce); }
-	void set_servo_target(float target_pos, float target_speed, float kp, float kd, float maxforce)  { jref->set_servo_target(target_pos, target_speed, kp, kd, maxforce); }
+	void set_servo_target(float target_pos, float kp, float kd, float maxforce)  { jref->set_servo_target(target_pos, kp, kd, maxforce); }
 	void reset_current_position(float pos, float vel)  { jref->reset_current_position(pos, vel); }
 	boost::python::tuple current_position()  { return make_tuple(jref->joint_current_position, jref->joint_current_speed); }
 	boost::python::tuple current_relative_position()  { float pos, speed; jref->joint_current_relative_position(&pos, &speed); return make_tuple(pos, speed); }

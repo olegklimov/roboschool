@@ -472,7 +472,7 @@ void Joint::set_motor_torque(float torque)
 	shared_ptr<World> w = wref.lock();
 	if (!r || !w) return;
 	if (first_torque_call) {
-		set_servo_target(0, 0, 0.1, 0.1, 0);
+		set_servo_target(0, 0.1, 0.1, 0);
 		first_torque_call = false;
 	}
 	torque_need_repeat = true;
@@ -493,7 +493,7 @@ void Joint::set_target_speed(float target_speed, float kd, float maxforce)
 	torque_need_repeat = false;
 }
 
-void Joint::set_servo_target(float target_pos, float target_speed, float kp, float kd, float maxforce)
+void Joint::set_servo_target(float target_pos, float kp, float kd, float maxforce)
 {
 	shared_ptr<Robot> r = robot.lock();
 	shared_ptr<World> w = wref.lock();
@@ -503,7 +503,6 @@ void Joint::set_servo_target(float target_pos, float target_speed, float kp, flo
 	b3SharedMemoryCommandHandle cmd = b3JointControlCommandInit2(w->client, r->bullet_handle, CONTROL_MODE_POSITION_VELOCITY_PD);
 	b3JointControlSetDesiredPosition(cmd, bullet_qindex, target_pos);
 	b3JointControlSetKp(cmd,              bullet_uindex, kp);
-	b3JointControlSetDesiredVelocity(cmd, bullet_uindex, target_speed);
 	b3JointControlSetKd(cmd,              bullet_uindex, kd);
 	b3JointControlSetMaximumForce(cmd,    bullet_uindex, maxforce);
 	b3SubmitClientCommandAndWaitStatus(w->client, cmd);
@@ -515,7 +514,6 @@ void Joint::set_relative_servo_target(float target_pos, float kp, float kd)
 {
 	float pos_mid = 0.5*(joint_limit1 + joint_limit2);
 	set_servo_target( pos_mid + 0.5*target_pos*(joint_limit2 - joint_limit1),
-		joint_max_velocity ? joint_max_velocity : 10.0,  // 10 rad/s
 		kp, kd,
 		joint_max_force ? joint_max_force : 40); // 40 is about as strong as humanoid hands
 }

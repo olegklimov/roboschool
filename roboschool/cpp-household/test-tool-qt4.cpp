@@ -244,7 +244,7 @@ public:
 				QDoubleSpinBox* spin = joint_spins[c];
 				float p = spin->value();
 				switch (joint_control_mode[c]) {
-				case 0: j->set_relative_servo_target(p, 0.02, 0.2); break;
+				case 0: j->set_relative_servo_target(p, 0.08, 0.8); break;
 				case 1: j->set_target_speed(p, 0.1, 20); break;
 				case 2: j->set_motor_torque(p); break;
 				default: assert(0);
