@@ -5,6 +5,10 @@
 
 namespace Household {
 
+#ifdef CHROME_TRACING
+static int chrome_trace_log = -1;
+#endif
+
 void World::bullet_init(float gravity, float timestep)
 {
 	char* fake_argv[] = { 0 };
@@ -14,10 +18,31 @@ void World::bullet_init(float gravity, float timestep)
 	settings_gravity = gravity;
 	settings_timestep = timestep;
 	settings_apply();
+
+#ifdef CHROME_TRACING
+	b3SharedMemoryCommandHandle command;
+	command = b3StateLoggingCommandInit(client);
+	b3StateLoggingStart(command, STATE_LOGGING_PROFILE_TIMINGS, "chrome_tracing.json");
+	b3SharedMemoryStatusHandle status = b3SubmitClientCommandAndWaitStatus(client, command);
+	int status_type = b3GetStatusType(status);
+	if (status_type == CMD_STATE_LOGGING_START_COMPLETED) {
+		chrome_trace_log = b3GetStatusLoggingUniqueId(status);
+		fprintf(stderr, "Start chrome trace log, handle %i\n", chrome_trace_log);
+	}
+#endif
 }
 
 World::~World()
 {
+#ifdef CHROME_TRACING
+	if (chrome_trace_log!=-1) {
+		fprintf(stderr, "Stop chrome trace log, handle %i\n", chrome_trace_log);
+		b3SharedMemoryCommandHandle command = b3StateLoggingCommandInit(client);
+		b3StateLoggingStop(command, chrome_trace_log);
+		b3SubmitClientCommandAndWaitStatus(client, command);
+		chrome_trace_log = -1;
+	}
+#endif
 	b3DisconnectSharedMemory(client);
 }
 
@@ -339,9 +364,9 @@ void World::bullet_step(int skip_frames)
 	) {
 		b3SharedMemoryCommandHandle command = b3InitPhysicsParamCommand(client);
 		b3PhysicsParamSetGravity(command, 0, 0, -settings_gravity);
-		b3PhysicsParamSetTimeStep(command, need_timestep);
 		b3PhysicsParamSetNumSolverIterations(command, 5);
 		b3PhysicsParamSetDefaultContactERP(command, 0.9);
+		b3PhysicsParamSetTimeStep(command, need_timestep);
 		settings_timestep_sent = need_timestep;
 		b3PhysicsParamSetNumSubSteps(command, skip_frames);
 		settings_skip_frames_sent = skip_frames;
