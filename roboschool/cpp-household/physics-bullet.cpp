@@ -205,7 +205,7 @@ void World::load_robot_joints(const shared_ptr<Robot>& robot, const std::string&
 			j->joint_type = info.m_jointType==eRevoluteType ? Joint::ROTATIONAL_MOTOR : Joint::LINEAR_MOTOR;
 			j->bullet_qindex = info.m_qIndex;
 			j->bullet_uindex = info.m_uIndex;
-			j->bullen_joint_n = c;
+			j->bullet_joint_n = c;
 			j->joint_has_limits = info.m_jointLowerLimit < info.m_jointUpperLimit;
 			j->joint_limit1 = info.m_jointLowerLimit;
 			j->joint_limit2 = info.m_jointUpperLimit;
@@ -547,8 +547,8 @@ void Joint::reset_current_position(float pos, float vel)
 	shared_ptr<World> w = wref.lock();
 	if (!r || !w) return;
 	b3SharedMemoryCommandHandle cmd = b3CreatePoseCommandInit(w->client, r->bullet_handle);
-	b3CreatePoseCommandSetJointPosition(w->client, cmd, bullen_joint_n, pos);
-	b3CreatePoseCommandSetJointVelocity(w->client, cmd, bullen_joint_n, vel);
+	b3CreatePoseCommandSetJointPosition(w->client, cmd, bullet_joint_n, pos);
+	b3CreatePoseCommandSetJointVelocity(w->client, cmd, bullet_joint_n, vel);
 	b3SubmitClientCommandAndWaitStatus(w->client, cmd);
 }
 

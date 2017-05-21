@@ -67,7 +67,7 @@ struct Joint {
 	weak_ptr<struct World> wref;
 
 	std::string joint_name;
-	int bullen_joint_n = -1;
+	int bullet_joint_n = -1;
 	int bullet_qindex = -1;
 	int bullet_uindex = -1;
 	enum { ROTATIONAL_MOTOR, LINEAR_MOTOR };
