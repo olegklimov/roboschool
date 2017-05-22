@@ -79,7 +79,7 @@ class RoboschoolForwardWalkersBase(RoboschoolMujocoXmlEnv, SharedMemoryClientEnv
     stall_torque_cost    = -0.1    # cost for running electric current through a motor even at zero rotational speed, small
     foot_collision_cost  = -1.0    # touches another leg, or other objects, that cost makes robot avoid smashing feet into itself
     foot_ground_object_names = set(["floor"])  # to distinguish ground and other objects
-    joints_at_limit_cost = -0.1    # discourage stuck joints
+    joints_at_limit_cost = -0.2    # discourage stuck joints
 
     def _step(self, a):
         if not self.scene.multiplayer:  # if multiplayer, action first applied to all robots, then global step() called, then _step() for all robots with the same actions
