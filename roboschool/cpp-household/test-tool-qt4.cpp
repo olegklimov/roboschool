@@ -164,6 +164,7 @@ public:
 			} else {
 				joint_control_mode[c] = 1;
 			}
+			joint_control_mode[c] = 2;
 			QToolButton* butt_ve = new QToolButton();
 			QToolButton* butt_tq = new QToolButton();
 			butt_ve->setObjectName(QString("%1") . arg(c));
