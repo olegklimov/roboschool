@@ -71,6 +71,12 @@ struct Pose {
 		btScalar pitch = asin(t2);
 		return make_tuple(roll, pitch, yaw);
 	}
+	Pose dot(const Pose& other)
+	{
+		Pose r;
+		r.from_bt_transform(convert_to_bt_transform() * other.convert_to_bt_transform());
+		return r;
+	}
 };
 
 struct Thingy {
@@ -608,6 +614,7 @@ void cpp_household_init()
 	.def("xyz", &Pose::xyz)
 	.def("quatertion", &Pose::quatertion)
 	.def("rotate_z", &Pose::rotate_z)
+	.def("dot", &Pose::dot)
 	;
 
 	class_<Thingy>("Thingy", no_init)
