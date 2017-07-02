@@ -122,7 +122,7 @@ class RoboschoolTennis(RoboschoolHumanoid):
         self.racquet = self.parts["racquet_head"]
         self.flag_reposition()
         self.random_yaw = not self.training_hit_ball
-        self.random_orientation(False)
+        self.set_initial_orientation(np.pi, np.pi)
         self.move_robot(self.STARTPOS_X, self.STARTPOS_Y, 0)
 
     def flag_reposition(self):

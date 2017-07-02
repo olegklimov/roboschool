@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<robot name="tennis_net">
+
+  <link name="net_itself">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.05 5 0.6"/>
+      </geometry>
+      <material name="solid_color">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.05 5 0.6"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="0.1" iyy="0.1" izz="0.1"/>
+    </inertial>
+  </link>
+
+</robot>
+
+
