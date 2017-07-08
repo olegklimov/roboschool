@@ -120,7 +120,7 @@ class RoboschoolForwardWalkersBase(RoboschoolMujocoXmlEnv, SharedMemoryClientEnv
             ]
 
         self.HUD(state, a, done)
-        return state, sum(self.rewards), bool(done), { "time_left": (1000-self.frame)*0.001 }
+        return state, sum(self.rewards), bool(done), {}
 
     def camera_adjust(self):
         x, y, z = self.body_xyz
@@ -196,15 +196,17 @@ class RoboschoolHumanoid(RoboschoolForwardWalkersBase):
         self.motor_names += ["left_shoulder1", "left_shoulder2", "left_elbow"]
         self.motor_power += [75, 75, 75]
         self.motors = [self.jdict[n] for n in self.motor_names]
-        self.random_orientation(True)
+        self.set_initial_orientation(yaw_center=0, yaw_random_spread=np.pi)
 
-    def random_orientation(self, towards_x_positive):
+    random_yaw = False
+    random_lean = False
+
+    def set_initial_orientation(self, yaw_center, yaw_random_spread):
         cpose = cpp_household.Pose()
-        yaw_center = 0 if towards_x_positive else np.pi
         if not self.random_yaw:
             yaw = yaw_center
         else:
-            yaw = yaw_center + self.np_random.uniform(low=-np.pi, high=np.pi)
+            yaw = yaw_center + self.np_random.uniform(low=-yaw_random_spread, high=yaw_random_spread)
 
         if self.random_lean and self.np_random.randint(2)==0:
             cpose.set_xyz(0, 0, 1.4)
@@ -221,9 +223,6 @@ class RoboschoolHumanoid(RoboschoolForwardWalkersBase):
             cpose.set_rpy(0, 0, yaw)  # just face random direction, but stay straight otherwise
         self.cpp_robot.set_pose_and_speed(cpose, 0,0,0)
         self.initial_z = 0.8
-
-    random_yaw = False
-    random_lean = False
 
     def apply_action(self, a):
         assert( np.isfinite(a).all() )
